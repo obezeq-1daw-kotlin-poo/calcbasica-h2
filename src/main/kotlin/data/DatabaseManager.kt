@@ -9,6 +9,31 @@ class DatabaseManager {
     private val user = "sa"
     private val password = ""
 
+    init {
+        initDatabase()
+    }
+
+    private fun initDatabase() {
+        var connection: Connection? = null
+        try {
+            connection = getConnection()
+            val statement = connection.createStatement()
+            statement.execute("""
+                CREATE TABLE IF NOT EXISTS operations (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    operacion VARCHAR(255) NOT NULL,
+                    resultado DOUBLE NOT NULL,
+                    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            println("[*] Tabla 'operations' creada correctamente")
+        } catch (e: SQLException) {
+            System.err.println("[-] Error al crear tabla: ${e.message}")
+        } finally {
+            connection?.close()
+        }
+    }
+
     fun getConnection(): Connection {
         return try {
             Class.forName("org.h2.Driver")
