@@ -1,8 +1,9 @@
-import app.Aplicacion
-import service.Calculadora
-import ui.Consola
+import data.DatabaseManager
 
-fun main(args: Array<String>) {
-    Aplicacion(Consola(), Calculadora()).ejecutar(args)
+fun main() {
+    val dbManager = DatabaseManager()
+    val conn = dbManager.getConnection()
+    println("[+] Conexion exitosa: ${!conn.isClosed}")
+    dbManager.closeConnection(conn)
 }
 
