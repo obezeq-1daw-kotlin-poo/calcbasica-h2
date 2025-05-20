@@ -14,6 +14,7 @@ class DatabaseManager {
             username = "sa"
             password = ""
             maximumPoolSize = 5
+            isAutoCommit = false
         }
         dataSource = HikariDataSource(config)
         initDatabase()
@@ -32,8 +33,10 @@ class DatabaseManager {
                     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
+            connection.commit()
             println("[*] Tabla 'operations' creada/verificada")
         } catch (e: SQLException) {
+            connection?.rollback()
             System.err.println("[-] Error inicialización BD: ${e.message}")
         } finally {
             connection?.close()
