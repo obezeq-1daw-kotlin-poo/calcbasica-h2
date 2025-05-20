@@ -1,22 +1,28 @@
 package data
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import java.sql.Connection
-import java.sql.DriverManager
 import java.sql.SQLException
 
 class DatabaseManager {
-    private val jdbcUrl = "jdbc:h2:./db/calcDB"
-    private val user = "sa"
-    private val password = ""
+    private val dataSource: HikariDataSource
 
     init {
+        val config = HikariConfig().apply {
+            jdbcUrl = "jdbc:h2:./db/calcDB"
+            username = "sa"
+            password = ""
+            maximumPoolSize = 5
+        }
+        dataSource = HikariDataSource(config)
         initDatabase()
     }
 
     private fun initDatabase() {
         var connection: Connection? = null
         try {
-            connection = getConnection()
+            connection = dataSource.connection
             val statement = connection.createStatement()
             statement.execute("""
                 CREATE TABLE IF NOT EXISTS operations (
@@ -26,30 +32,15 @@ class DatabaseManager {
                     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
-            println("[*] Tabla 'operations' creada correctamente")
+            println("[*] Tabla 'operations' creada/verificada")
         } catch (e: SQLException) {
-            System.err.println("[-] Error al crear tabla: ${e.message}")
+            System.err.println("[-] Error inicialización BD: ${e.message}")
         } finally {
             connection?.close()
         }
     }
 
     fun getConnection(): Connection {
-        return try {
-            Class.forName("org.h2.Driver")
-            DriverManager.getConnection(jdbcUrl, user, password)
-        } catch (e: Exception) {
-            throw SQLException("Error al conectar a H2: ${e.message}")
-        }
-    }
-
-    fun closeConnection(connection: Connection) {
-        try {
-            if (!connection.isClosed) {
-                connection.close()
-            }
-        } catch (e: SQLException) {
-            System.err.println("[-] Error al cerrar conexión: ${e.message}")
-        }
+        return dataSource.connection
     }
 }
