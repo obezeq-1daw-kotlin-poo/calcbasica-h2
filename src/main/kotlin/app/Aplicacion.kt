@@ -92,25 +92,44 @@ class Aplicacion(
                 val resultado = calculadora.calcular(num1, num2, operador)
                 consola.mostrarResultado(resultado)
 
-                val operacion = Operation(
-                    operacion = "$num1 $operador $num2",
-                    resultado = resultado
-                )
-                historyManager.guardarOperacion(operacion)
+                try {
+                    val operacion = Operation(
+                        operacion = "$num1 $operador $num2",
+                        resultado = resultado
+                    )
+                    historyManager.guardarOperacion(operacion)
+                } catch (e: SQLException) {
+                    consola.mostrarError("Error grave: No se pudo guardar en el historial")
+                    consola.mostrarError("Detalles técnicos: ${e.message}")
+                    // AQUI LO QUE HAGO ES BASICAMENTE UN ROLLBACK IMPLICITO GRACIAS AL MANEJO QUE TENGO DIRECTAMENTE EN EL DAO
+                }
 
+            } catch (e: ArithmeticException) {
+                consola.mostrarError("Error matemático: ${e.message}")
+                guardarErrorEnHistorial(e)
+            } catch (e: IllegalArgumentException) {
+                consola.mostrarError("Operación no válida: ${e.message}")
+                guardarErrorEnHistorial(e)
             } catch (e: Exception) {
-                consola.mostrarError(e.message ?: "Error desconocido")
-                val errorOp = Operation(
-                    operacion = "ERROR: ${e.message}",
-                    resultado = 0.0
-                )
-                historyManager.guardarOperacion(errorOp)
+                consola.mostrarError("Error inesperado: ${e.javaClass.simpleName}")
+                guardarErrorEnHistorial(e)
             }
 
             continuar = preguntarRepetir()
         }
+    }
 
-        consola.mostrarInfo("\n[+] FIN DEL PROGRAMA - Historial guardado en BD")
+    private fun guardarErrorEnHistorial(e: Exception) {
+        try {
+            val errorOp = Operation(
+                operacion = "ERROR: ${e.message?.take(50)}", // CON ESTO LO QUE HAGO ES LIMPIAR LA LONGITUD DEL ERROR PARA QUE NO HAYA PROBLEMAS EN CUANTO A LONGITUD MAXIMA
+                resultado = 0.0
+            )
+            historyManager.guardarOperacion(errorOp)
+        } catch (dbEx: SQLException) {
+            consola.mostrarError("CRITICO: Fallo al guardar error en BD")
+            consola.mostrarError("Detalles: ${dbEx.message}")
+        }
     }
 
     private fun consolaPausa() {

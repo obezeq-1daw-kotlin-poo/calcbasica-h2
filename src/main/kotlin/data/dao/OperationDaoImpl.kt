@@ -12,20 +12,24 @@ class OperationDaoImpl(private val dbManager: DatabaseManager) : OperationDao {
         val connection = dbManager.getConnection()
         var statement: java.sql.PreparedStatement? = null
         try {
+            // Me aseguro que el autocommit este en false para poder hacer commits y rollbacks manualmente en el control de excepciones gracias al try catch
+            connection.autoCommit = false
             val query = """
-                INSERT INTO operations (operacion, resultado, fecha) 
-                VALUES (?, ?, ?)
-            """.trimIndent()
+            INSERT INTO operations (operacion, resultado, fecha) 
+            VALUES (?, ?, ?)
+        """.trimIndent()
 
             statement = connection.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS)
-
             statement.setString(1, operation.operacion)
             statement.setDouble(2, operation.resultado)
-            statement.setTimestamp(3, Timestamp(operation.fecha.time))
+            statement.setTimestamp(3, java.sql.Timestamp(operation.fecha.time))
 
-            statement.executeUpdate()
+            val affectedRows = statement.executeUpdate()
+            if (affectedRows == 0) {
+                throw SQLException("[-] Error: Ninguna fila afectada")
+            }
+
             connection.commit()
-
             val generatedKeys = statement.generatedKeys
             return if (generatedKeys.next()) {
                 generatedKeys.getLong(1)
@@ -34,7 +38,7 @@ class OperationDaoImpl(private val dbManager: DatabaseManager) : OperationDao {
             }
         } catch (e: SQLException) {
             connection.rollback()
-            throw SQLException("[-] Error DAO al insertar: ${e.message}")
+            throw e
         } finally {
             statement?.close()
             connection.close()
