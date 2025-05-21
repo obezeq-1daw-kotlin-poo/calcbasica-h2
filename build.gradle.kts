@@ -5,6 +5,11 @@ plugins {
 group = "org.example"
 version = "1.0-SNAPSHOT"
 
+tasks.register<JavaExec>("run") {
+    mainClass.set("MainKt")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 repositories {
     mavenCentral()
 }
