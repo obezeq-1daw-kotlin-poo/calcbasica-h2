@@ -69,8 +69,4 @@ class OperationDaoImpl(private val dbManager: DatabaseManager) : OperationDao {
             connection.close()
         }
     }
-
-    override fun deleteOperationById(id: Long): Boolean {
-        throw UnsupportedOperationException("[-] No implementado aún")
-    }
 }

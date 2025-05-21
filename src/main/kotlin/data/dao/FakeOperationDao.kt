@@ -10,6 +10,4 @@ class FakeOperationDao : OperationDao {
 
     override fun getAllOperations() = operations
 
-    override fun deleteOperationById(id: Long) = true
-
 }
