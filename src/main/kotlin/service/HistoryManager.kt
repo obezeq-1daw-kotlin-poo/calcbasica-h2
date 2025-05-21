@@ -21,4 +21,12 @@ class HistoryManager(private val operationDao: OperationDao) {
             emptyList()
         }
     }
+
+    fun obtenerHistorialFiltrado(filtro: (Operation) -> Boolean): List<Operation> {
+        return try {
+            operationDao.getAllOperations().filter(filtro)
+        } catch (e: SQLException) {
+            throw SQLException("Error filtrando historial: ${e.message}")
+        }
+    }
 }
