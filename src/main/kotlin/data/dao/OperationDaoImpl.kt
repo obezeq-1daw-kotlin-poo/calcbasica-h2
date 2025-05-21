@@ -19,7 +19,7 @@ class OperationDaoImpl(private val dbManager: DatabaseManager) : OperationDao {
 
             statement = connection.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS)
 
-            statement.setString(1, operation.operaction)
+            statement.setString(1, operation.operacion)
             statement.setDouble(2, operation.resultado)
             statement.setTimestamp(3, Timestamp(operation.fecha.time))
 
@@ -54,7 +54,7 @@ class OperationDaoImpl(private val dbManager: DatabaseManager) : OperationDao {
                 operations.add(
                     Operation(
                         id = resultSet.getLong("id"),
-                        operaction = resultSet.getString("operacion"),
+                        operacion = resultSet.getString("operacion"),
                         resultado = resultSet.getDouble("resultado"),
                         fecha = resultSet.getTimestamp("fecha")
                     )

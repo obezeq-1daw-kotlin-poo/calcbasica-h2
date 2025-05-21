@@ -8,17 +8,15 @@ fun main() {
     val dao = OperationDaoImpl(dbManager)
 
     val op = Operation(
-        operaction = "5 + 3",
-        resultado = 8.0
+        operacion = "10 / 2",
+        resultado = 5.0
     )
 
     try {
         val id = dao.insertOperation(op)
-        println("Operación insertada con ID: $id")
-
-        val ops = dao.getAllOperations()
-        println("Operaciones en BD: ${ops.size}")
+        val savedOp = dao.getAllOperations().first()
+        println("[+] Operación guardada: ${savedOp.operacion} = ${savedOp.resultado}")
     } catch (e: SQLException) {
-        println("Error FATAL: ${e.message}")
+        println("[-] Error crítico: ${e.message}")
     }
 }
