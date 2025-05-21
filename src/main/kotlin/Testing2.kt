@@ -13,8 +13,12 @@ fun main() {
     )
 
     try {
-        dao.insertOperation(op)
+        val id = dao.insertOperation(op)
+        println("Operación insertada con ID: $id")
+
+        val ops = dao.getAllOperations()
+        println("Operaciones en BD: ${ops.size}")
     } catch (e: SQLException) {
-        println("[-] Error esperado: ${e.message}")
+        println("Error FATAL: ${e.message}")
     }
 }

@@ -4,30 +4,39 @@ import data.DatabaseManager
 import model.Operation
 import java.sql.ResultSet
 import java.sql.SQLException
-import java.sql.Statement
+import java.sql.Timestamp
 
 class OperationDaoImpl(private val dbManager: DatabaseManager) : OperationDao {
 
     override fun insertOperation(operation: Operation): Long {
         val connection = dbManager.getConnection()
+        var statement: java.sql.PreparedStatement? = null
         try {
             val query = """
-                INSERT INTO operations (operaction, resultado, fecha) 
-                VALUES ('${operation.operaction}', ${operation.resultado}, '${operation.fecha}')
+                INSERT INTO operations (operacion, resultado, fecha) 
+                VALUES (?, ?, ?)
             """.trimIndent()
 
-            val statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
-            statement.executeUpdate()
+            statement = connection.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS)
 
-            val generatedKeys: ResultSet = statement.generatedKeys
+            statement.setString(1, operation.operaction)
+            statement.setDouble(2, operation.resultado)
+            statement.setTimestamp(3, Timestamp(operation.fecha.time))
+
+            statement.executeUpdate()
+            connection.commit()
+
+            val generatedKeys = statement.generatedKeys
             return if (generatedKeys.next()) {
                 generatedKeys.getLong(1)
             } else {
                 throw SQLException("[-] Error al obtener ID generado")
             }
         } catch (e: SQLException) {
+            connection.rollback()
             throw SQLException("[-] Error DAO al insertar: ${e.message}")
         } finally {
+            statement?.close()
             connection.close()
         }
     }
@@ -35,24 +44,28 @@ class OperationDaoImpl(private val dbManager: DatabaseManager) : OperationDao {
     override fun getAllOperations(): List<Operation> {
         val operations = mutableListOf<Operation>()
         val connection = dbManager.getConnection()
+        var statement: java.sql.Statement? = null
+        var resultSet: ResultSet? = null
         try {
-            val resultSet = connection.createStatement()
-                .executeQuery("SELECT id, operaction, resultado, fecha FROM operations")
+            statement = connection.createStatement()
+            resultSet = statement.executeQuery("SELECT id, operacion, resultado, fecha FROM operations")
 
             while (resultSet.next()) {
                 operations.add(
                     Operation(
                         id = resultSet.getLong("id"),
-                        operaction = resultSet.getString("operaction"),
+                        operaction = resultSet.getString("operacion"),
                         resultado = resultSet.getDouble("resultado"),
-                        fecha = resultSet.getDate("fecha")
+                        fecha = resultSet.getTimestamp("fecha")
                     )
                 )
             }
             return operations
         } catch (e: SQLException) {
-            throw SQLException("[-] Error DAO al leer operaciones: ${e.message}")
+            throw SQLException("[-] Error DAO al leer: ${e.message}")
         } finally {
+            resultSet?.close()
+            statement?.close()
             connection.close()
         }
     }
