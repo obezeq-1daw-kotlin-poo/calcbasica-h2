@@ -10,10 +10,10 @@ class DatabaseManager {
 
     init {
         val config = HikariConfig().apply {
-            jdbcUrl = "jdbc:h2:./db/calcDB"
-            username = "sa"
-            password = ""
-            maximumPoolSize = 5
+            jdbcUrl = DatabaseConfig.JDBC_URL
+            username = DatabaseConfig.USERNAME
+            password = DatabaseConfig.PASSWORD
+            maximumPoolSize = DatabaseConfig.MAX_POOL_SIZE
             isAutoCommit = false
         }
         dataSource = HikariDataSource(config)
@@ -21,25 +21,24 @@ class DatabaseManager {
     }
 
     private fun initDatabase() {
-        var connection: Connection? = null
-        try {
-            connection = dataSource.connection
-            val statement = connection.createStatement()
-            statement.execute("""
-                CREATE TABLE IF NOT EXISTS operations (
-                    id INT PRIMARY KEY AUTO_INCREMENT,
-                    operacion VARCHAR(255) NOT NULL,
-                    resultado DOUBLE NOT NULL,
-                    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
-            connection.commit()
-            println("[*] Tabla 'operations' creada/verificada")
-        } catch (e: SQLException) {
-            connection?.rollback()
-            System.err.println("[-] Error inicialización BD: ${e.message}")
-        } finally {
-            connection?.close()
+        dataSource.connection.use { connection ->
+            try {
+                connection.createStatement().use { statement ->
+                    statement.execute("""
+                        CREATE TABLE IF NOT EXISTS operations (
+                            id INT PRIMARY KEY AUTO_INCREMENT,
+                            operacion VARCHAR(255) NOT NULL,
+                            resultado DOUBLE NOT NULL,
+                            fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """)
+                    connection.commit()
+                    println("[*] Tabla 'operations' creada/verificada")
+                }
+            } catch (e: SQLException) {
+                connection.rollback()
+                System.err.println("[-] Error inicialización BD: ${e.message}")
+            }
         }
     }
 

@@ -14,7 +14,7 @@ fun main(args: Array<String>) {
     val consola = Consola()
     val calculadora = Calculadora()
 
-    if (args.isNotEmpty() && args[0] == "calcDB") {
+    if (args.isNotEmpty() && args[0] == "testDB") {
         pruebaBaseDeDatos(operationDao, historyManager)
     } else {
         Aplicacion(consola, calculadora, historyManager).ejecutar(args)
