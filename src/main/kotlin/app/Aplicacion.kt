@@ -38,7 +38,7 @@ class Aplicacion(
             consola.mostrarInfo("     Historial Reciente     ")
             consola.mostrarInfo("───────────────────────────")
             historyManager.obtenerHistorial().takeLast(3).forEach { op ->
-                val fechaFormateada = SimpleDateFormat("dd/MM/yyyy HH:mm").format(op.fecha)
+                val fechaFormateada = consola.formatearFecha(op.fecha)
                 consola.mostrarInfo("[$fechaFormateada] ${op.operacion} = ${op.resultado}")
             }
         } catch (e: SQLException) {
