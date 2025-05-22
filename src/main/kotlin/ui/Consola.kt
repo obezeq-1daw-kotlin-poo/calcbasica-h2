@@ -2,7 +2,7 @@ package ui
 
 import model.Operation
 import java.text.SimpleDateFormat
-import java.util.Scanner
+import java.util.*
 
 class Consola {
     val scanner = Scanner(System.`in`)
@@ -45,6 +45,10 @@ class Consola {
         print("\n[+] Seleccione una opción: ")
     }
 
+    fun formatearFecha(fecha: Date): String {
+        return SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(fecha)
+    }
+
     fun mostrarHistorial(operaciones: List<Operation>) {
         if (operaciones.isEmpty()) {
             println("\n[!] No hay operaciones registradas")
@@ -54,8 +58,7 @@ class Consola {
         println("       Historial de Operaciones     ")
         println("────────────────────────────────────")
         operaciones.forEach { op ->
-            val fechaFormateada = SimpleDateFormat("dd/MM/yyyy HH:mm").format(op.fecha)
-            println("[$fechaFormateada] ${op.operacion} = ${op.resultado}")
+            println("[${formatearFecha(op.fecha)}] ${op.operacion} = ${op.resultado}")
         }
     }
 
