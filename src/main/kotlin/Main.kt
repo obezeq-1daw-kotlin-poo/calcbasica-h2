@@ -8,15 +8,21 @@ import ui.Consola
 import java.sql.SQLException
 
 fun main(args: Array<String>) {
+    val dbManager = DatabaseManager()
+    val operationDao = OperationDaoImpl(dbManager)
+    val historyManager = HistoryManager(operationDao)
+    val consola = Consola()
+    val calculadora = Calculadora()
+
     if (args.isNotEmpty() && args[0] == "test-db") {
-        pruebaBaseDeDatos()
+        pruebaBaseDeDatos(operationDao, historyManager)
     } else {
-        Aplicacion(Consola(), Calculadora()).ejecutar(args)
+        Aplicacion(consola, calculadora, historyManager).ejecutar(args)
     }
 }
 
 /** REALIZO UN TEST MANUAL SIMPLE PARA PROBAR LA BASE DE DATOS */
-fun pruebaBaseDeDatos() {
+fun pruebaBaseDeDatos(dao: OperationDaoImpl, history: HistoryManager) {
     println("\n──────────────────────────────────────────────────────")
     println("           INICIALIZANDO CALCULADORA 3000             ")
     println("──────────────────────────────────────────────────────")

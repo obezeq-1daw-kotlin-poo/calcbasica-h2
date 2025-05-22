@@ -12,14 +12,11 @@ import java.util.*
 
 class Aplicacion(
     private val consola: Consola,
-    private val calculadora: Calculadora
+    private val calculadora: Calculadora,
+    private val historyManager: HistoryManager
 ) {
-    private lateinit var historyManager: HistoryManager
 
     fun ejecutar(args: Array<String> = emptyArray()) {
-        val dbManager = DatabaseManager()
-        val operationDao = OperationDaoImpl(dbManager)
-        historyManager = HistoryManager(operationDao)
 
         when (args.size) {
             0, 1 -> mostrarHistorialInicial()
