@@ -8,6 +8,7 @@ import java.sql.Timestamp
 class OperationDaoImpl(private val dbManager: DatabaseManager) : OperationDao {
 
     override fun insertOperation(operation: Operation): Long {
+        require(operation.operacion.isNotBlank()) { "[-] Operación no puede estar vacía" }
         return dbManager.getConnection().use { connection ->
             try {
                 // Me aseguro que el autocommit este en false para poder hacer commits y rollbacks manualmente

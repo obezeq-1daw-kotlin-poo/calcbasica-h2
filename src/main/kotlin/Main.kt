@@ -14,22 +14,18 @@ fun main(args: Array<String>) {
     val consola = Consola()
     val calculadora = Calculadora()
 
-    if (args.isNotEmpty() && args[0] == "test-db") {
+    if (args.isNotEmpty() && args[0] == "calcDB") {
         pruebaBaseDeDatos(operationDao, historyManager)
     } else {
         Aplicacion(consola, calculadora, historyManager).ejecutar(args)
     }
 }
 
-/** REALIZO UN TEST MANUAL SIMPLE PARA PROBAR LA BASE DE DATOS */
+/** TEST MANUAL DE BASE DE DATOS CON ESTILO CALCULADORA 3000 */
 fun pruebaBaseDeDatos(dao: OperationDaoImpl, history: HistoryManager) {
-    println("\n──────────────────────────────────────────────────────")
-    println("           INICIALIZANDO CALCULADORA 3000             ")
     println("──────────────────────────────────────────────────────")
-
-    val dbManager = DatabaseManager()
-    val dao = OperationDaoImpl(dbManager)
-    val historyManager = HistoryManager(dao)
+    println("               PRUEBA DE BASE DE DATOS                ")
+    println("──────────────────────────────────────────────────────")
 
     val operacionDePrueba = Operation(
         operacion = "2 + 2",
@@ -38,23 +34,24 @@ fun pruebaBaseDeDatos(dao: OperationDaoImpl, history: HistoryManager) {
 
     try {
         val id = dao.insertOperation(operacionDePrueba)
-        println("[+] Operacion insertada con ID: $id")
+        println("[*] Operación insertada con ID: $id")
     } catch (e: SQLException) {
-        println("[-] Error insertando operación: ${e.message}")
+        println("\n[-] CRÍTICO: Fallo en inserción")
+        println("[-] Razón: ${e.message}")
         return
     }
 
     try {
         val operaciones = dao.getAllOperations()
         println("\n───────────────────────────")
-        println("     OPERACIONES EN BD     ")
+        println("       REGISTROS EN BD     ")
         println("───────────────────────────")
         operaciones.forEach {
-            println("ID ${it.id}: ${it.operacion} = ${it.resultado}")
+            println("[*] ID ${it.id}: ${it.operacion.padEnd(15)} = ${it.resultado}")
         }
     } catch (e: SQLException) {
-        println("[-] Error leyendo operaciones: ${e.message}")
+        println("\n[-] CRÍTICO: Fallo en lectura")
+        println("[-] Razón: ${e.message}")
+        return
     }
-
-    println("[+] Prueba realizada con exito, muchas gracias y que tenga un buen dia ;D")
 }
